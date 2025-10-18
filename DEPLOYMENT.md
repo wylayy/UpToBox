@@ -143,42 +143,6 @@ pm2 logs uptobox
 pm2 monit
 ```
 
-### Using Systemd
-
-Create service file:
-
-```bash
-sudo nano /etc/systemd/system/uptobox.service
-```
-
-Add content:
-
-```ini
-[Unit]
-Description=UpToBox File Sharing Service
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/var/www/uptobox
-Environment=NODE_ENV=production
-ExecStart=/usr/bin/node server/index.js
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start:
-
-```bash
-sudo systemctl enable uptobox
-sudo systemctl start uptobox
-sudo systemctl status uptobox
-```
-
 ---
 
 ## 🔥 Firewall Configuration
@@ -205,10 +169,6 @@ sudo ufw enable
 # PM2
 pm2 status
 pm2 logs uptobox --lines 100
-
-# Systemd
-sudo systemctl status uptobox
-sudo journalctl -u uptobox -n 100 -f
 ```
 
 ### Nginx Logs
