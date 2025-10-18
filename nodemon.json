@@ -1,0 +1,15 @@
+{
+  "watch": ["server"],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules",
+    "client",
+    "uploads",
+    "data",
+    "*.log"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}
