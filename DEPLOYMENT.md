@@ -50,11 +50,7 @@ cd client && npm install && cd ..
 # Build frontend
 npm run build
 
-# Create required directories
-mkdir -p uploads data
-
 # Set permissions
-sudo chown -R $USER:$USER /var/www/uptobox
 chmod -R 755 /var/www/uptobox
 ```
 
@@ -344,48 +340,5 @@ chmod +x /var/www/uptobox/backup.sh
 # Add to crontab (daily at 2 AM)
 (crontab -l 2>/dev/null; echo "0 2 * * * /var/www/uptobox/backup.sh") | crontab -
 ```
-
----
-
-## 🔒 Security Checklist
-
-- [ ] SSL/HTTPS enabled
-- [ ] Firewall configured (UFW)
-- [ ] Nginx rate limiting enabled
-- [ ] Strong server passwords
-- [ ] Regular system updates
-- [ ] Fail2ban installed (optional)
-- [ ] Backup system configured
-- [ ] Monitor disk space
-- [ ] Log rotation enabled
-
----
-
-## 📱 Health Monitoring
-
-Test your deployment:
-
-```bash
-# Health check
-curl https://your-domain.com/health
-
-# Upload test
-curl -F "file=@test.txt" https://your-domain.com/api/upload
-
-# Get stats
-curl https://your-domain.com/api/stats
-```
-
----
-
-## 🆘 Support
-
-For issues and questions:
-- Check logs first
-- Review this deployment guide
-- Check GitHub issues
-- Contact: your-email@example.com
-
----
 
 **Made with ❤️ by wylay**
