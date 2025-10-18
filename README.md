@@ -4,10 +4,10 @@
 
 **Fast, Secure, and Beautiful File Sharing**
 
-[![CI/CD Pipeline](https://github.com/wylay/uptobox/actions/workflows/test.yml/badge.svg)](https://github.com/wylay/uptobox/actions/workflows/test.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue?logo=react)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
 
 </div>
 
@@ -28,32 +28,28 @@
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-
-### Installation
+### Development
 
 ```bash
 # Clone repository
 git clone https://github.com/wylay/uptobox.git
 cd uptobox
 
-# Install backend dependencies
+# Install dependencies
 npm install
-
-# Install frontend dependencies
-cd client
-npm install
-cd ..
+cd client && npm install && cd ..
 
 # Start development server
 npm run dev
 ```
 
-The app will be available at:
+App will run at:
 - **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:3001
+
+### Production Deployment
+
+For complete production deployment guide (Ubuntu/Nginx/SSL/PM2), see **[DEPLOYMENT.md](./DEPLOYMENT.md)**
 
 ---
 
@@ -83,22 +79,41 @@ curl -X POST http://localhost:3001/api/upload \
 ```bash
 # Build and run
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop
-docker-compose down
 ```
 
-### Environment Variables
+### Production Server
 
-Create `.env` file:
-```env
-PORT=3001
-BASE_URL=http://localhost:3001
-MAX_FILE_SIZE=104857600
-NODE_ENV=production
+**Complete deployment guide:** **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
+Includes:
+- ✅ Ubuntu/Debian server setup
+- ✅ Nginx reverse proxy configuration
+- ✅ SSL certificate (Let's Encrypt)
+- ✅ PM2 process manager
+- ✅ Firewall & security setup
+- ✅ Monitoring & backup strategies
+- ✅ Troubleshooting guide
+
+### Quick Production Setup
+
+```bash
+# 1. Clone and build
+git clone https://github.com/wylay/uptobox.git /var/www/uptobox
+cd /var/www/uptobox
+npm install && cd client && npm install && npm run build && cd ..
+
+# 2. Configure environment
+cp .env.example .env
+nano .env  # Edit your settings
+
+# 3. Setup Nginx (see nginx.conf)
+sudo cp nginx.conf /etc/nginx/sites-available/uptobox
+sudo ln -s /etc/nginx/sites-available/uptobox /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# 4. Start with PM2
+pm2 start server/index.js --name uptobox
+pm2 save && pm2 startup
 ```
 
 ---
