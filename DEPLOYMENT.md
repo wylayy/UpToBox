@@ -47,23 +47,15 @@ git clone https://github.com/yourusername/uptobox.git .
 npm install
 cd client && npm install && cd ..
 
+# Configure environment
+cp .env.example .env
+nano .env
+
 # Build frontend
 npm run build
 
 # Set permissions
 chmod -R 755 /var/www/uptobox
-```
-
-### 3. Configure Environment
-
-```bash
-# Create .env file
-cat > .env << EOF
-PORT=3001
-BASE_URL=https://your-domain.com
-MAX_FILE_SIZE=104857600
-NODE_ENV=production
-EOF
 ```
 
 ---
