@@ -44,8 +44,7 @@ cd /var/www/uptobox
 git clone https://github.com/yourusername/uptobox.git .
 
 # Install dependencies
-npm install
-cd client && npm install && cd ..
+npm run install:all
 
 # Configure environment
 cp .env.example .env
