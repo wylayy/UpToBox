@@ -91,11 +91,16 @@ sudo certbot --nginx -d your-domain.com
 ### 1. Copy Configuration
 
 ```bash
+
+
+# Remove default site
+sudo rm /etc/nginx/sites-enabled/default
+
 # For production with SSL
-sudo cp nginx.conf /etc/nginx/sites-available/uptobox
+sudo cp nginx.conf /etc/nginx/sites-available/uptobox.conf
 
 # Edit configuration
-sudo nano /etc/nginx/sites-available/uptobox
+sudo nano /etc/nginx/sites-available/uptobox.conf
 ```
 
 ### 2. Update Configuration
@@ -109,10 +114,7 @@ Replace the following in `nginx.conf`:
 
 ```bash
 # Create symlink
-sudo ln -s /etc/nginx/sites-available/uptobox /etc/nginx/sites-enabled/
-
-# Remove default site
-sudo rm /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/uptobox.conf /etc/nginx/sites-enabled/uptobox.conf
 
 # Test configuration
 sudo nginx -t
