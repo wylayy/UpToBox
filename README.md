@@ -4,6 +4,7 @@
 
 **Fast, Secure, and Beautiful File Sharing**
 
+[![CI/CD Pipeline](https://github.com/wylayy/UpToBox/actions/workflows/test.yml/badge.svg)](https://github.com/wylayy/UpToBox/actions/workflows/test.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue?logo=react)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
