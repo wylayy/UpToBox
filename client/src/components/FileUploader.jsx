@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, X, Check, AlertCircle, Clock, QrCode, Eye } from 'lucide-react'
-import axios from 'axios'
+import apiClient from '../utils/apiClient'
 import toast from 'react-hot-toast'
 import { celebrateUpload } from '../utils/confetti'
 import { getFileIcon, getFileColor, canPreview } from '../utils/fileIcons'
@@ -57,7 +57,7 @@ function FileUploader() {
           type: fileToUpload.type
         })
 
-        const response = await axios.post('/api/upload', formData, {
+        const response = await apiClient.post('/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

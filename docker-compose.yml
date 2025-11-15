@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  uptobox:
+  uplinkr:
     build: .
-    container_name: uptobox-cdn
+    container_name: uplinkr-cdn
     ports:
       - "3001:3001"
     environment:

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import apiClient from '../utils/apiClient'
 import { Server, HardDrive, Files, Download, Cpu, Activity, RefreshCw } from 'lucide-react'
 
 function SystemStats() {
@@ -9,7 +9,7 @@ function SystemStats() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('/api/stats')
+      const response = await apiClient.get('/stats')
       setStats(response.data)
     } catch (error) {
       console.error('Failed to fetch stats:', error)

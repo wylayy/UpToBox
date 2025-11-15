@@ -1,5 +1,5 @@
 {
-  "name": "uptobox",
+  "name": "uplinkr",
   "version": "1.0.0-release",
   "description": "Modern file uploader and CDN service",
   "main": "server/index.js",

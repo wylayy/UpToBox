@@ -11,7 +11,7 @@ function Header() {
           </div>
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              UpToBox
+              Uplinkr
             </h1>
             <p className="text-xs text-slate-400">Fast & Secure File Sharing</p>
           </div>

@@ -1,295 +1,283 @@
-# 🚀 Deployment Guide
+﻿#  Uplinkr Deployment Guide
 
-Complete guide for deploying UpToBox to production.
+This guide explains how to deploy Uplinkr to production in a few different ways:
 
----
-
-## 📋 Prerequisites
-
-- Ubuntu/Debian server (20.04+ recommended)
-- Node.js 18+ installed
-- Nginx installed
-- SSL certificate (Let's Encrypt recommended)
-- Domain name pointed to your server
+- Docker Compose (simplest, recommended)
+- Bare metal (Node.js + PM2 + Nginx)
+- Cloudflare Tunnel (cloudflared) to expose Uplinkr securely without opening ports
 
 ---
 
-## 🔧 Server Setup
+## 1. Application overview
 
-### 1. Install Dependencies
+Uplinkr consists of:
+
+- Backend: Node.js + Express (server/index.js)
+  - Listens on PORT (default 3001)
+  - Uses environment variables:
+    - UPLOAD_DIR (default ./uploads)
+    - MAX_FILE_SIZE
+    - BASE_URL (public URL of the backend)
+    - CLIENT_URL (public URL of the frontend, used for redirects /f/:fileId)
+- Frontend: React + Vite (client/)
+  - Built to static files in client/dist
+  - In production usually served by Nginx or by a static host/CDN
+
+Prerequisites:
+
+- Node.js 18+
+- npm
+- (optional) Docker & Docker Compose
+- (optional) Nginx
+- (optional) Cloudflare account + cloudflared if using tunnels
+
+---
+
+## 2. Environment variables
+
+Copy the example file and adjust values:
 
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Node.js 18
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# Install Nginx
-sudo apt install -y nginx
-
-# Install PM2 (Process Manager)
-sudo npm install -g pm2
-```
-
-### 2. Clone and Setup Project
-
-```bash
-# Create app directory
-sudo mkdir -p /var/www/uptobox
-cd /var/www/uptobox
-
-# Clone repository
-git clone https://github.com/yourusername/uptobox.git .
-
-# Install dependencies
-npm run install:all
-
-# Configure environment
 cp .env.example .env
 nano .env
-
-# Build frontend
-npm run build
-
-# Set permissions
-chmod -R 755 /var/www/uptobox
 ```
+
+Common settings:
+
+```bash
+PORT=3001
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=104857600          # 100 MB
+BASE_URL=https://uplinkr.example.com
+CLIENT_URL=https://uplinkr.example.com
+```
+
+For local development you can use http://localhost:3001 and http://localhost:5173.
 
 ---
 
-## 🔐 SSL Certificate (Let's Encrypt)
+## 3. Deploy with Docker Compose (recommended)
+
+1. Clone repository and install dependencies
 
 ```bash
-# Install Certbot
-sudo apt install -y certbot python3-certbot-nginx
+git clone https://github.com/wylay/Uplinkr.git
+cd Uplinkr
 
-# Get SSL certificate
-sudo certbot --nginx -d your-domain.com
-
-# Auto-renewal is configured automatically
+npm run install:all
+npm run build   # builds frontend
 ```
+
+2. Configure .env (as above).
+
+3. Start with Docker Compose
+
+```bash
+docker-compose up -d --build
+```
+
+This will:
+
+- Build the Uplinkr image
+- Run the backend on port 3001 inside the container
+- Mount ./uploads and ./data to /app/uploads and /app/data
+
+4. Health check
+
+```bash
+curl http://localhost:3001/health
+```
+
+You should see JSON with status: "healthy".
 
 ---
 
-## 🌐 Nginx Configuration
+## 4. Bare-metal deployment (Node.js + PM2 + Nginx)
 
-### 1. Copy Configuration
+1. Clone and install
 
 ```bash
+sudo mkdir -p /var/www/uplinkr
+sudo chown -R $USER:$USER /var/www/uplinkr
 
-
-# Remove default site
-sudo rm /etc/nginx/sites-enabled/default
-
-# For production with SSL
-sudo cp nginx.conf /etc/nginx/sites-available/uptobox.conf
-
-# Edit configuration
-sudo nano /etc/nginx/sites-available/uptobox.conf
+cd /var/www/uplinkr
+git clone https://github.com/wylay/Uplinkr.git .
+npm run install:all
 ```
 
-### 2. Update Configuration
-
-Replace the following in `nginx.conf`:
-- `your-domain.com` → Your actual domain
-- SSL certificate paths (if not using Let's Encrypt)
-- Root path if different from `/var/www/uptobox`
-
-### 3. Enable Site
+2. Configure environment and build frontend
 
 ```bash
-# Create symlink
-sudo ln -s /etc/nginx/sites-available/uptobox.conf /etc/nginx/sites-enabled/uptobox.conf
+cp .env.example .env
+nano .env      # set BASE_URL and CLIENT_URL to your domain
 
-# Test configuration
+npm run build  # builds React app into client/dist
+```
+
+3. Run backend with PM2
+
+```bash
+sudo npm install -g pm2
+
+pm2 start server/index.js --name uplinkr
+pm2 save
+pm2 startup      # follow the printed command
+```
+
+4. Configure Nginx
+
+Use nginx.conf in the repo as base:
+
+```bash
+sudo cp nginx.conf /etc/nginx/sites-available/uplinkr.conf
+sudo ln -s /etc/nginx/sites-available/uplinkr.conf /etc/nginx/sites-enabled/uplinkr.conf
+
 sudo nginx -t
-
-# Reload Nginx
 sudo systemctl reload nginx
 ```
 
+Make sure paths inside nginx.conf match your install, for example:
+
+- Root: /var/www/uplinkr/client/dist
+- Logs: /var/log/nginx/uplinkr-access.log and /var/log/nginx/uplinkr-error.log
+
+5. Check
+
+- Visit https://your-domain/
+- Check pm2 status and Nginx logs if something fails.
+
 ---
 
-## 🚀 Start Application
+## 5. Deployment via Cloudflare Tunnel (cloudflared)
 
-### Using PM2 (Recommended)
+If you use Cloudflare for DNS, you can expose Uplinkr without opening ports by using Cloudflare Tunnel.
+
+### 5.1 Prerequisites
+
+- Domain managed by Cloudflare, for example uplinkr.example.com
+- Uplinkr already running locally on the server:
+  - Either via Nginx on port 80/443
+  - Or directly via Node on port 3001
+- cloudflared installed on the server
+
+Install cloudflared (Ubuntu example):
 
 ```bash
-# Start app with PM2
-pm2 start server/index.js --name uptobox
-
-# Save PM2 process list
-pm2 save
-
-# Setup PM2 to start on boot
-pm2 startup
-# Follow the command output
-
-# View logs
-pm2 logs uptobox
-
-# Monitor
-pm2 monit
+# See Cloudflare docs for the latest instructions
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared jammy main" | sudo tee /etc/apt/sources.list.d/cloudflared.list
+sudo apt update && sudo apt install -y cloudflared
 ```
 
----
-
-## 🔥 Firewall Configuration
+### 5.2 Login and create tunnel
 
 ```bash
-# Allow HTTP and HTTPS
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-
-# Allow SSH (if not already)
-sudo ufw allow 22/tcp
-
-# Enable firewall
-sudo ufw enable
+cloudflared tunnel login          # authorize with Cloudflare in the browser
+cloudflared tunnel create uplinkr-tunnel
 ```
 
----
+This creates a tunnel and a credentials JSON file under /etc/cloudflared/.
 
-## 📊 Monitoring & Maintenance
+### 5.3 Configure ingress
 
-### Check Application Status
+Create /etc/cloudflared/config.yml:
+
+```yaml
+tunnel: uplinkr-tunnel
+credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  # If you use Nginx listening on 80/443 as reverse proxy for Uplinkr
+  - hostname: uplinkr.example.com
+    service: http://localhost:80
+
+  # Or, if you expose the Node server directly without Nginx:
+  # - hostname: uplinkr.example.com
+  #   service: http://localhost:3001
+
+  # Fallback rule
+  - service: http_status:404
+```
+
+Replace:
+
+- <TUNNEL_ID> with the actual file name created by cloudflared.
+- uplinkr.example.com with your real domain.
+
+### 5.4 Route DNS through the tunnel
 
 ```bash
-# PM2
+cloudflared tunnel route dns uplinkr-tunnel uplinkr.example.com
+```
+
+Cloudflare will create a special CNAME record for the tunnel.
+
+### 5.5 Run the tunnel as a service
+
+Test first:
+
+```bash
+cloudflared tunnel run uplinkr-tunnel
+```
+
+If it works, install as a system service:
+
+```bash
+sudo cloudflared service install
+sudo systemctl enable --now cloudflared
+```
+
+Now Cloudflare will connect to your tunnel, and traffic to https://uplinkr.example.com will be routed to your server (Nginx or Node) via the tunnel.
+
+### 5.6 Environment variables for tunneled setup
+
+When using a public domain via Cloudflare Tunnel, set in .env:
+
+```bash
+BASE_URL=https://uplinkr.example.com
+CLIENT_URL=https://uplinkr.example.com
+```
+
+Then restart the backend (PM2 or Docker) so it picks up the new values.
+
+---
+
+## 6. Troubleshooting
+
+Health check:
+
+```bash
+curl http://localhost:3001/health
+```
+
+PM2:
+
+```bash
 pm2 status
-pm2 logs uptobox --lines 100
+pm2 logs uplinkr --lines 100
 ```
 
-### Nginx Logs
+Nginx:
 
 ```bash
-# Access logs
-sudo tail -f /var/log/nginx/uptobox-access.log
-
-# Error logs
-sudo tail -f /var/log/nginx/uptobox-error.log
+sudo tail -f /var/log/nginx/uplinkr-access.log
+sudo tail -f /var/log/nginx/uplinkr-error.log
 ```
 
-### Disk Usage
+Cloudflared:
 
 ```bash
-# Check uploads folder size
-du -sh /var/www/uptobox/uploads
-
-# Check database size
-du -sh /var/www/uptobox/data
+sudo journalctl -u cloudflared -f
+cloudflared tunnel list
+cloudflared tunnel info uplinkr-tunnel
 ```
+
+If something still does not work, usually the problem is in one of these:
+
+- BASE_URL / CLIENT_URL in .env
+- local firewall rules
+- Cloudflare Tunnel ingress configuration
 
 ---
 
-## 🔄 Updates & Deployment
-
-```bash
-# Navigate to project
-cd /var/www/uptobox
-
-# Pull latest changes
-git pull
-
-# Install dependencies
-npm install
-cd client && npm install && cd ..
-
-# Build frontend
-npm run build
-
-# Restart application
-pm2 restart uptobox
-# OR
-sudo systemctl restart uptobox
-```
-
----
-
-## 🔧 Troubleshooting
-
-### Application won't start
-
-```bash
-# Check logs
-pm2 logs uptobox --err
-
-# Check if port is in use
-sudo lsof -i :3001
-
-# Check file permissions
-ls -la /var/www/uptobox
-```
-
-### Nginx errors
-
-```bash
-# Test configuration
-sudo nginx -t
-
-# Check error logs
-sudo tail -f /var/log/nginx/error.log
-
-# Restart Nginx
-sudo systemctl restart nginx
-```
-
-### File upload issues
-
-```bash
-# Check upload directory permissions
-ls -la /var/www/uptobox/uploads
-
-# Fix permissions
-sudo chown -R www-data:www-data /var/www/uptobox/uploads
-chmod -R 755 /var/www/uptobox/uploads
-```
-
----
-
-## 🎯 Performance Optimization
-
-### Enable Gzip in Nginx
-
-Add to nginx.conf server block:
-
-```nginx
-gzip on;
-gzip_vary on;
-gzip_min_length 1024;
-gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
-```
-
-### PM2 Cluster Mode
-
-```bash
-# Use multiple CPU cores
-pm2 start server/index.js -i max --name uptobox
-```
-
-### Database Backup
-
-```bash
-# Create backup script
-cat > /var/www/uptobox/backup.sh << 'EOF'
-#!/bin/bash
-BACKUP_DIR="/var/backups/uptobox"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-mkdir -p $BACKUP_DIR
-tar -czf $BACKUP_DIR/data-$DATE.tar.gz /var/www/uptobox/data
-tar -czf $BACKUP_DIR/uploads-$DATE.tar.gz /var/www/uptobox/uploads
-
-# Keep only last 7 backups
-find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
-EOF
-
-chmod +x /var/www/uptobox/backup.sh
-
-# Add to crontab (daily at 2 AM)
-(crontab -l 2>/dev/null; echo "0 2 * * * /var/www/uptobox/backup.sh") | crontab -
-```
-
-**Made with ❤️ by wylay**
+Made with love for reliable Uplinkr deployments.

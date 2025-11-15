@@ -1,10 +1,10 @@
-# 🚀 UpToBox - Modern File Sharing Platform
+# 🚀 Uplinkr - Modern File Sharing Platform
 
 <div align="center">
 
 **Fast, Secure, and Beautiful File Sharing**
 
-[![CI/CD Pipeline](https://github.com/wylayy/UpToBox/actions/workflows/test.yml/badge.svg)](https://github.com/wylayy/UpToBox/actions/workflows/test.yml)
+[![CI/CD Pipeline](https://github.com/wylayy/Uplinkr/actions/workflows/test.yml/badge.svg)](https://github.com/wylayy/Uplinkr/actions/workflows/test.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue?logo=react)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -33,8 +33,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/wylay/uptobox.git
-cd uptobox
+git clone https://github.com/wylay/Uplinkr.git
+cd Uplinkr
 
 # Install dependencies
 npm install
@@ -47,6 +47,23 @@ npm run dev
 App will run at:
 - **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:3001
+
+### Configuration
+
+Copy the example environment file and adjust values as needed:
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Key variables:
+
+- `PORT`, `UPLOAD_DIR`, `MAX_FILE_SIZE`, `NODE_ENV`
+- `BASE_URL`, `CLIENT_URL` (must match your public URL in production)
+- Optional: `ALLOWED_MIME_TYPES` to restrict allowed MIME types (e.g. `image/png,image/jpeg,application/pdf`)
+
+See **DEPLOYMENT.md** for production examples (including Cloudflare Tunnel).
 
 ### Production Deployment
 
@@ -73,52 +90,6 @@ curl -X POST http://localhost:3001/api/upload \
 
 ---
 
-## 🐳 Deployment
-
-### Docker
-
-```bash
-# Build and run
-docker-compose up -d
-```
-
-### Production Server
-
-**Complete deployment guide:** **[DEPLOYMENT.md](./DEPLOYMENT.md)**
-
-Includes:
-- ✅ Ubuntu/Debian server setup
-- ✅ Nginx reverse proxy configuration
-- ✅ SSL certificate (Let's Encrypt)
-- ✅ PM2 process manager
-- ✅ Firewall & security setup
-- ✅ Monitoring & backup strategies
-- ✅ Troubleshooting guide
-
-### Quick Production Setup
-
-```bash
-# 1. Clone and build
-git clone https://github.com/wylay/uptobox.git /var/www/uptobox
-cd /var/www/uptobox
-npm install && cd client && npm install && npm run build && cd ..
-
-# 2. Configure environment
-cp .env.example .env
-nano .env  # Edit your settings
-
-# 3. Setup Nginx (see nginx.conf)
-sudo cp nginx.conf /etc/nginx/sites-available/uptobox
-sudo ln -s /etc/nginx/sites-available/uptobox /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-
-# 4. Start with PM2
-pm2 start server/index.js --name uptobox
-pm2 save && pm2 startup
-```
-
----
-
 ## 🔧 Tech Stack
 
 **Backend:** Node.js, Express, Multer, node-cron, express-rate-limit, geoip-lite
@@ -135,6 +106,6 @@ MIT License
 
 <div align="center">
 
-Made with ❤️ by [wylay](https://waylay.biz.id)
+Made with ❤️ by [wylayy](https://waylay.biz.id)
 
 </div>

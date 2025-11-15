@@ -83,4 +83,4 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Build Docker image
-      run: docker build -t uptobox:test .
+      run: docker build -t uplinkr:test .

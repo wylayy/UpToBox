@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import axios from 'axios'
+import apiClient from '../utils/apiClient'
 import toast from 'react-hot-toast'
 import { Download, File, Calendar, ArrowLeft, AlertCircle, Loader } from 'lucide-react'
 
@@ -13,7 +13,7 @@ function FilePage() {
   useEffect(() => {
     const fetchFileData = async () => {
       try {
-        const response = await axios.get(`/api/file/${fileId}`)
+        const response = await apiClient.get(`/file/${fileId}`)
         setFileData(response.data)
       } catch (err) {
         setError(err.response?.data?.error || 'File not found')
