@@ -163,6 +163,11 @@ function registerRoutes(app) {
           free: os.freemem(),
           used: os.totalmem() - os.freemem()
         },
+        storage: {
+          uploadsDir: UPLOAD_DIR,
+          uploadsSize: dbStats.total_size || 0,
+          dbFileSize: dbStats.db_file_size || 0
+        },
         cpus: os.cpus().length,
         cpuModel: os.cpus()[0]?.model || 'Unknown'
       }

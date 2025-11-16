@@ -56,13 +56,27 @@ function SystemStats() {
   return (
     <div className="space-y-6">
       {/* Main Stats */}
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="card bg-gradient-to-br from-blue-600/20 to-blue-800/20 border-blue-500/30">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-300 text-sm mb-1">Total Files</p>
               <p className="text-3xl font-bold">{stats?.totalFiles || 0}</p>
             </div>
+
+            {stats.system.storage && (
+              <div className="bg-slate-800/50 rounded-lg p-4 lg:col-span-3">
+                <div className="flex items-center mb-2">
+                  <HardDrive className="w-4 h-4 text-cyan-400 mr-2" />
+                  <p className="text-slate-400 text-sm">Storage Usage</p>
+                </div>
+                <div className="space-y-1 text-sm text-slate-300">
+                  <p>Uploads directory: <span className="font-mono break-all">{stats.system.storage.uploadsDir}</span></p>
+                  <p>Files size: {formatBytes(stats.system.storage.uploadsSize || 0)}</p>
+                  <p>Metadata (DB) size: {formatBytes(stats.system.storage.dbFileSize || 0)}</p>
+                </div>
+              </div>
+            )}
             <div className="bg-blue-600/30 p-3 rounded-lg">
               <Files className="w-8 h-8 text-blue-400" />
             </div>
@@ -97,7 +111,7 @@ function SystemStats() {
       {/* System Information */}
       {stats?.system && (
         <div className="card">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h3 className="text-xl font-semibold flex items-center">
               <Server className="w-5 h-5 mr-2 text-primary-400" />
               System Information
@@ -111,7 +125,7 @@ function SystemStats() {
             </button>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-slate-800/50 rounded-lg p-4">
               <div className="flex items-center mb-2">
                 <Cpu className="w-4 h-4 text-primary-400 mr-2" />
@@ -138,7 +152,7 @@ function SystemStats() {
               <p className="text-lg font-semibold">{formatUptime(stats.system.uptime)}</p>
             </div>
 
-            <div className="bg-slate-800/50 rounded-lg p-4 md:col-span-3">
+            <div className="bg-slate-800/50 rounded-lg p-4 lg:col-span-3">
               <div className="flex items-center mb-2">
                 <Cpu className="w-4 h-4 text-purple-400 mr-2" />
                 <p className="text-slate-400 text-sm">CPU Information</p>

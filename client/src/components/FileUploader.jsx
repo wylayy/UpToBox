@@ -177,18 +177,18 @@ function FileUploader() {
         }`}
       >
         <input {...getInputProps()} />
-        <div className="text-center py-12">
+        <div className="text-center py-8 sm:py-12">
           <div className="inline-block p-4 bg-primary-600/20 rounded-full mb-4">
             <Upload className="w-12 h-12 text-primary-400" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">
             {isDragActive ? 'Drop files here' : 'Drag & drop files here'}
           </h3>
           <p className="text-slate-400 mb-1">or click to select files</p>
           <p className="text-xs text-slate-500 mb-4">
             💡 Tip: Press <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">Ctrl+V</kbd> to paste screenshots
           </p>
-          <button className="btn-primary" disabled={uploading}>
+          <button className="btn-primary px-4 py-2 text-sm" disabled={uploading}>
             {uploading ? 'Uploading...' : 'Select Files'}
           </button>
         </div>
@@ -233,7 +233,7 @@ function FileUploader() {
               return (
                 <div
                   key={index}
-                  className="bg-slate-800/50 rounded-lg p-4 flex items-center justify-between"
+                  className="bg-slate-800/50 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
                     <div className="bg-primary-600/20 p-2 rounded">
@@ -244,7 +244,7 @@ function FileUploader() {
                       <p className="text-sm text-slate-400">{formatFileSize(file.size)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:space-x-2 sm:gap-2 sm:ml-4">
                     {canPreview(file.mimetype || file.type) && (
                       <button
                         onClick={() => setPreviewFile(file)}
@@ -263,13 +263,13 @@ function FileUploader() {
                     </button>
                     <button
                       onClick={() => copyToClipboard(file.url)}
-                      className="btn-secondary text-sm py-1 px-3"
+                      className="btn-secondary text-xs sm:text-sm py-1 px-3"
                     >
                       Copy Link
                     </button>
                     <button
                       onClick={() => window.open(file.url, '_blank')}
-                      className="btn-primary text-sm py-1 px-3"
+                      className="btn-primary text-xs sm:text-sm py-1 px-3"
                     >
                       Download
                     </button>

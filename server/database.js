@@ -147,14 +147,22 @@ const dbOps = {
   getStats() {
     try {
       const files = Object.values(database.files);
+      let dbFileSize = 0;
+      try {
+        const stat = fs.statSync(DB_PATH);
+        dbFileSize = stat.size;
+      } catch (e) {
+        dbFileSize = 0;
+      }
       return {
         total_files: files.length,
         total_size: files.reduce((sum, file) => sum + file.size, 0),
-        total_downloads: files.reduce((sum, file) => sum + file.downloads, 0)
+        total_downloads: files.reduce((sum, file) => sum + file.downloads, 0),
+        db_file_size: dbFileSize
       };
     } catch (error) {
       console.error('Database error getting stats:', error);
-      return { total_files: 0, total_size: 0, total_downloads: 0 };
+      return { total_files: 0, total_size: 0, total_downloads: 0, db_file_size: 0 };
     }
   },
 
