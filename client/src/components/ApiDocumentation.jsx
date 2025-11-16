@@ -23,9 +23,11 @@ function ApiDocumentation() {
       code: `# Set to public base URL
 BASE_URL="${exampleBaseUrl}"
 
-# Upload file
+# Upload file with optional expiry and password
 curl -X POST "$BASE_URL/api/upload" \\
-  -F "file=@/path/to/your/file.pdf"
+  -F "file=@/path/to/your/file.pdf" \\
+  -F "expiry=7days" \\
+  -F "password=secret123"
 
 # Response:
 # {
@@ -34,8 +36,12 @@ curl -X POST "$BASE_URL/api/upload" \\
 #     "id": "abc123xyz",
 #     "name": "file.pdf",
 #     "size": 1048576,
+#     "mimetype": "application/pdf",
 #     "url": "$BASE_URL/f/abc123xyz",
-#     "downloadUrl": "$BASE_URL/api/download/abc123xyz"
+#     "downloadUrl": "$BASE_URL/api/download/abc123xyz",
+#     "shortUrl": "$BASE_URL/s/abc123",
+#     "expiryDate": "2024-01-01T00:00:00.000Z",
+#     "hasPassword": true
 #   }
 # }`
     },
@@ -250,8 +256,14 @@ Write-Host "File URL: $($response.file.url)"`
           </span>{' '}
           <span className="font-mono">{`${exampleBaseUrl}/api/upload`}</span>
         </p>
-        <p className="text-sm text-slate-400">Upload files using multipart/form-data with
-          field name: <code className="bg-slate-900 px-2 py-0.5 rounded">file</code>
+        <p className="text-sm text-slate-400">
+          Upload files using multipart/form-data with fields:
+          {' '}
+          <code className="bg-slate-900 px-2 py-0.5 rounded ml-1">file</code> (required),
+          {' '}
+          <code className="bg-slate-900 px-2 py-0.5 rounded ml-1">expiry</code> (optional: 1day, 7days, 1month, never),
+          {' '}
+          <code className="bg-slate-900 px-2 py-0.5 rounded ml-1">password</code> (optional download password).
         </p>
       </div>
 
@@ -314,11 +326,19 @@ Write-Host "File URL: $($response.file.url)"`
     "id": "abc123xyz",
     "name": "document.pdf",
     "size": 1048576,
+    "mimetype": "application/pdf",
     "url": "${exampleBaseUrl}/f/abc123xyz",
-    "downloadUrl": "${exampleBaseUrl}/api/download/abc123xyz"
+    "downloadUrl": "${exampleBaseUrl}/api/download/abc123xyz",
+    "shortUrl": "${exampleBaseUrl}/s/abc123",
+    "expiryDate": "2024-01-01T00:00:00.000Z",
+    "hasPassword": true
   }
 }`}</code>
         </pre>
+        <p className="mt-2 text-xs text-slate-400">
+          <span className="font-mono">expiryDate</span> can be <span className="font-mono">null</span> for non-expiring files,
+          and <span className="font-mono">shortUrl</span> may be <span className="font-mono">null</span> for older uploads.
+        </p>
       </div>
 
       <div className="mt-6 bg-purple-600/20 border border-purple-500/30 rounded-lg p-4">
@@ -327,19 +347,47 @@ Write-Host "File URL: $($response.file.url)"`
           <div>
             <span className="font-mono bg-slate-900 px-2 py-1 rounded text-blue-400">GET</span>{' '}
             <span className="font-mono text-slate-300">/api/file/:fileId</span>
-            <p className="text-slate-400 ml-12">Get file information</p>
+            <p className="text-slate-400 ml-12">
+              Get file information (including <span className="font-mono">url</span>, <span className="font-mono">downloadUrl</span>,
+              <span className="font-mono"> shortUrl</span> and <span className="font-mono">hasPassword</span>).
+            </p>
           </div>
           <div>
             <span className="font-mono bg-slate-900 px-2 py-1 rounded text-green-400">GET</span>{' '}
             <span className="font-mono text-slate-300">/api/download/:fileId</span>
-            <p className="text-slate-400 ml-12">Download file</p>
+            <p className="text-slate-400 ml-12">
+              Download file. If the file is password-protected, send
+              <span className="font-mono"> X-Download-Password</span> header with the correct password.
+            </p>
           </div>
           <div>
             <span className="font-mono bg-slate-900 px-2 py-1 rounded text-blue-400">GET</span>{' '}
             <span className="font-mono text-slate-300">/api/stats</span>
-            <p className="text-slate-400 ml-12">Get system statistics</p>
+            <p className="text-slate-400 ml-12">
+              Get system statistics and storage usage (total files, total size, downloads, DB file size).
+            </p>
+          </div>
+          <div>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-indigo-400">GET</span>{' '}
+            <span className="font-mono text-slate-300">/f/:fileId</span>
+            <p className="text-slate-400 ml-12">
+              Redirect to the public HTML download page for a file (used in normal share links).
+            </p>
+          </div>
+          <div>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-indigo-400">GET</span>{' '}
+            <span className="font-mono text-slate-300">/s/:shortId</span>
+            <p className="text-slate-400 ml-12">
+              Short link redirect to the same public file page, e.g.
+              <span className="font-mono"> {`${exampleBaseUrl}/s/abc123`}</span>.
+            </p>
           </div>
         </div>
+        <p className="mt-3 text-xs text-slate-400">
+          Error responses use the format <span className="font-mono">{"{\"error\": \"message\"}"}</span>, for example
+          <span className="font-mono"> "File type not allowed"</span> or
+          <span className="font-mono"> "File flagged as malware"</span> when virus scanning is enabled.
+        </p>
       </div>
     </div>
   )
