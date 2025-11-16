@@ -4,7 +4,7 @@ import { Code, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
 function ApiDocumentation() {
   const [copiedCode, setCopiedCode] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
-  const exampleBaseUrl = import.meta.env.VITE_PUBLIC_BASE_URL
+  const exampleBaseUrl = import.meta.env.VITE_PUBLIC_BASE_URL || 'https://uplinkr.example.com'
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text)
@@ -250,9 +250,7 @@ Write-Host "File URL: $($response.file.url)"`
           </span>{' '}
           <span className="font-mono">{`${exampleBaseUrl}/api/upload`}</span>
         </p>
-        <p className="text-sm text-slate-400">
-          Replace <code className="bg-slate-900 px-2 py-0.5 rounded">{exampleBaseUrl}</code> with your public URL
-          (same as <code>BASE_URL</code> / <code>CLIENT_URL</code> in <code>.env</code>). Upload files using multipart/form-data with
+        <p className="text-sm text-slate-400">Upload files using multipart/form-data with
           field name: <code className="bg-slate-900 px-2 py-0.5 rounded">file</code>
         </p>
       </div>
