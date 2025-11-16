@@ -240,6 +240,22 @@ CLIENT_URL=https://uplinkr.example.com
 
 Then restart the backend (PM2 or Docker) so it picks up the new values.
 
+### 5.7 Development tunnel (optional)
+
+For local development, you can expose the Vite dev server (with hot reload) via a temporary Cloudflare Tunnel, without Nginx:
+
+```bash
+# In the project directory
+npm run dev          # starts Vite on http://localhost:5173
+
+# In another terminal
+cloudflared tunnel --url http://localhost:5173
+```
+
+Cloudflare will print a temporary URL (for example `https://random-string.trycloudflare.com`) that you can open in the browser or share.
+
+This mode is only for temporary debugging; you usually do **not** need to change `BASE_URL` / `CLIENT_URL` in `.env` for this.
+
 ---
 
 ## 6. Troubleshooting

@@ -4,6 +4,7 @@ import { Code, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
 function ApiDocumentation() {
   const [copiedCode, setCopiedCode] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
+  const exampleBaseUrl = 'https://uplinkr.example.com'
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text)
@@ -19,8 +20,11 @@ function ApiDocumentation() {
     {
       id: 'curl',
       language: 'cURL (Bash)',
-      code: `# Upload file
-curl -X POST http://localhost:3001/api/upload \\
+      code: `# Set your public base URL (same as BASE_URL / CLIENT_URL in .env)
+BASE_URL="${exampleBaseUrl}"
+
+# Upload file
+curl -X POST "$BASE_URL/api/upload" \\
   -F "file=@/path/to/your/file.pdf"
 
 # Response:
@@ -30,8 +34,8 @@ curl -X POST http://localhost:3001/api/upload \\
 #     "id": "abc123xyz",
 #     "name": "file.pdf",
 #     "size": 1048576,
-#     "url": "http://localhost:3001/f/abc123xyz",
-#     "downloadUrl": "http://localhost:3001/api/download/abc123xyz"
+#     "url": "$BASE_URL/f/abc123xyz",
+#     "downloadUrl": "$BASE_URL/api/download/abc123xyz"
 #   }
 # }`
     },
@@ -39,13 +43,15 @@ curl -X POST http://localhost:3001/api/upload \\
       id: 'javascript',
       language: 'JavaScript (Fetch API)',
       code: `// Upload file using Fetch API
+const BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+
 const fileInput = document.querySelector('input[type="file"]');
 const file = fileInput.files[0];
 
 const formData = new FormData();
 formData.append('file', file);
 
-fetch('http://localhost:3001/api/upload', {
+fetch(BASE_URL + '/api/upload', {
   method: 'POST',
   body: formData
 })
@@ -64,10 +70,12 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 
+const BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+
 const form = new FormData();
 form.append('file', fs.createReadStream('/path/to/file.pdf'));
 
-axios.post('http://localhost:3001/api/upload', form, {
+axios.post(BASE_URL + '/api/upload', form, {
   headers: form.getHeaders()
 })
   .then(response => {
@@ -82,7 +90,9 @@ axios.post('http://localhost:3001/api/upload', form, {
       code: `# Upload file using Python requests
 import requests
 
-url = 'http://localhost:3001/api/upload'
+BASE_URL = '${exampleBaseUrl}'  # same as BASE_URL / CLIENT_URL in .env
+
+url = BASE_URL + '/api/upload'
 files = {'file': open('/path/to/file.pdf', 'rb')}
 
 response = requests.post(url, files=files)
@@ -97,7 +107,8 @@ print('File URL:', data['file']['url'])`
       code: `<?php
 // Upload file using PHP cURL
 $file_path = '/path/to/file.pdf';
-$url = 'http://localhost:3001/api/upload';
+$BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+$url = $BASE_URL . '/api/upload';
 
 $curl = curl_init();
 $file = new CURLFile($file_path);
@@ -132,6 +143,8 @@ import (
     "os"
 )
 
+const baseURL = "${exampleBaseUrl}" // same as BASE_URL / CLIENT_URL in .env
+
 func uploadFile(filepath string) {
     file, _ := os.Open(filepath)
     defer file.Close()
@@ -143,7 +156,7 @@ func uploadFile(filepath string) {
     writer.Close()
 
     request, _ := http.NewRequest("POST", 
-        "http://localhost:3001/api/upload", body)
+        baseURL+"/api/upload", body)
     request.Header.Set("Content-Type", writer.FormDataContentType())
 
     client := &http.Client{}
@@ -173,8 +186,9 @@ class Program
         
         form.Add(streamContent, "file", Path.GetFileName(filePath));
         
+        const string BASE_URL = "${exampleBaseUrl}"; // same as BASE_URL / CLIENT_URL in .env
         var response = await client.PostAsync(
-            "http://localhost:3001/api/upload", form);
+            BASE_URL + "/api/upload", form);
         var result = await response.Content.ReadAsStringAsync();
         
         Console.WriteLine(result);
@@ -188,7 +202,9 @@ class Program
 require 'net/http'
 require 'uri'
 
-uri = URI('http://localhost:3001/api/upload')
+BASE_URL = '${exampleBaseUrl}' # same as BASE_URL / CLIENT_URL in .env
+
+uri = URI(BASE_URL + '/api/upload')
 request = Net::HTTP::Post.new(uri)
 
 form_data = [
@@ -206,7 +222,8 @@ puts response.body`
       id: 'powershell',
       language: 'PowerShell',
       code: `# Upload file using PowerShell
-$uri = "http://localhost:3001/api/upload"
+$BASE_URL = "${exampleBaseUrl}" # same as BASE_URL / CLIENT_URL in .env
+$uri = "$BASE_URL/api/upload"
 $filePath = "C:\\path\\to\\file.pdf"
 
 $form = @{
@@ -231,10 +248,12 @@ Write-Host "File URL: $($response.file.url)"`
           <span className="font-mono bg-slate-900 px-2 py-1 rounded text-green-400">
             POST
           </span>{' '}
-          <span className="font-mono">http://localhost:3001/api/upload</span>
+          <span className="font-mono">{`${exampleBaseUrl}/api/upload`}</span>
         </p>
         <p className="text-sm text-slate-400">
-          Upload files using multipart/form-data with field name: <code className="bg-slate-900 px-2 py-0.5 rounded">file</code>
+          Replace <code className="bg-slate-900 px-2 py-0.5 rounded">{exampleBaseUrl}</code> with your public URL
+          (same as <code>BASE_URL</code> / <code>CLIENT_URL</code> in <code>.env</code>). Upload files using multipart/form-data with
+          field name: <code className="bg-slate-900 px-2 py-0.5 rounded">file</code>
         </p>
       </div>
 
@@ -297,8 +316,8 @@ Write-Host "File URL: $($response.file.url)"`
     "id": "abc123xyz",
     "name": "document.pdf",
     "size": 1048576,
-    "url": "http://localhost:3001/f/abc123xyz",
-    "downloadUrl": "http://localhost:3001/api/download/abc123xyz"
+    "url": "${exampleBaseUrl}/f/abc123xyz",
+    "downloadUrl": "${exampleBaseUrl}/api/download/abc123xyz"
   }
 }`}</code>
         </pre>
