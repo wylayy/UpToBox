@@ -1,9 +1,11 @@
 const path = require('path')
 const fs = require('fs')
 const crypto = require('crypto')
+const { execFileSync } = require('child_process')
+const { nanoid } = require('nanoid')
 const db = require('../database')
 const { trackDownload } = require('../middleware/analytics')
-const { UPLOAD_DIR, BASE_URL, ALLOWED_MIME_TYPES } = require('../config')
+const { UPLOAD_DIR, BASE_URL, ALLOWED_MIME_TYPES, CLAMAV_ENABLED, CLAMSCAN_PATH } = require('../config')
 
 const ALLOWED_EXPIRY_OPTIONS = ['1day', '7days', '1month', 'never']
 
@@ -40,11 +42,66 @@ function cleanupPhysicalFile(filename) {
   }
 }
 
+function scanFileForMalware(filename) {
+  if (!CLAMAV_ENABLED) {
+    return { ok: true }
+  }
+
+  const filePath = path.join(UPLOAD_DIR, filename)
+
+  try {
+    const stdout = execFileSync(CLAMSCAN_PATH, ['--no-summary', filePath], {
+      encoding: 'utf8'
+    })
+
+    if (stdout && stdout.includes('OK')) {
+      return { ok: true }
+    }
+
+    cleanupPhysicalFile(filename)
+    return {
+      ok: false,
+      status: 400,
+      message: 'File failed virus scan'
+    }
+  } catch (err) {
+    const output = (err.stdout || err.message || '').toString()
+    if (output.includes('FOUND')) {
+      cleanupPhysicalFile(filename)
+      return {
+        ok: false,
+        status: 400,
+        message: 'File flagged as malware'
+      }
+    }
+
+    console.error('Virus scan error:', err)
+    cleanupPhysicalFile(filename)
+    return {
+      ok: false,
+      status: 500,
+      message: 'Virus scan failed'
+    }
+  }
+}
+
 function isMimeTypeAllowed(file) {
   if (!ALLOWED_MIME_TYPES || ALLOWED_MIME_TYPES.length === 0) {
     return true
   }
   return ALLOWED_MIME_TYPES.includes(file.mimetype)
+}
+
+function generateUniqueShortId() {
+  // Short ID for "short links"; collisions are very unlikely but we guard anyway
+  let attempt = 0
+  let shortId
+  do {
+    shortId = nanoid(6)
+    attempt += 1
+  } while (db.getFileByShortId && db.getFileByShortId(shortId) && attempt < 5)
+
+  return shortId
 }
 
 function createFileRecord({ file, expiryOption, customFilename, password }) {
@@ -76,6 +133,11 @@ function createFileRecord({ file, expiryOption, customFilename, password }) {
     }
   }
 
+  const scanResult = scanFileForMalware(file.filename)
+  if (!scanResult.ok) {
+    return scanResult
+  }
+
   let passwordHash = null
   let passwordSalt = null
 
@@ -88,11 +150,13 @@ function createFileRecord({ file, expiryOption, customFilename, password }) {
   }
 
   const fileId = path.parse(file.filename).name
+  const shortId = generateUniqueShortId()
   const expiryDate = calculateExpiryDate(normalizedExpiry)
   const originalName = customFilename || file.originalname
 
   const fileData = {
     id: fileId,
+    shortId,
     originalName,
     filename: file.filename,
     mimetype: file.mimetype,
@@ -115,6 +179,7 @@ function createFileRecord({ file, expiryOption, customFilename, password }) {
 
   const fileUrl = `${BASE_URL}/f/${fileId}`
   const downloadUrl = `${BASE_URL}/api/download/${fileId}`
+  const shortUrl = `${BASE_URL}/s/${shortId}`
 
   return {
     ok: true,
@@ -128,6 +193,7 @@ function createFileRecord({ file, expiryOption, customFilename, password }) {
       url: fileUrl,
       downloadUrl,
       expiryDate,
+      shortUrl,
       hasPassword: !!passwordHash
     }
   }
@@ -238,7 +304,8 @@ function getFileInfo(fileId) {
       downloads: fileData.downloads,
       hasPassword: !!fileData.password_hash,
       url: `${BASE_URL}/f/${fileId}`,
-      downloadUrl: `${BASE_URL}/api/download/${fileId}`
+      downloadUrl: `${BASE_URL}/api/download/${fileId}`,
+      shortUrl: fileData.short_id ? `${BASE_URL}/s/${fileData.short_id}` : null
     }
   }
 }

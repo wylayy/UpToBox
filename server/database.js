@@ -64,6 +64,7 @@ const dbOps = {
         size: fileData.size,
         upload_date: fileData.uploadDate,
         expiry_date: fileData.expiryDate || null,
+        short_id: fileData.shortId || null,
         password_hash: fileData.password_hash || null,
         password_salt: fileData.password_salt || null,
         downloads: 0,
@@ -74,6 +75,17 @@ const dbOps = {
     } catch (error) {
       console.error('Database error adding file:', error);
       return false;
+    }
+  },
+
+  // Get file by short ID (for short links)
+  getFileByShortId(shortId) {
+    try {
+      const files = Object.values(database.files);
+      return files.find((file) => file.short_id === shortId) || null;
+    } catch (error) {
+      console.error('Database error getting file by shortId:', error);
+      return null;
     }
   },
 

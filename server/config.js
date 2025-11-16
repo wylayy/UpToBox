@@ -10,6 +10,9 @@ const ALLOWED_MIME_TYPES = process.env.ALLOWED_MIME_TYPES
   ? process.env.ALLOWED_MIME_TYPES.split(',').map((t) => t.trim()).filter(Boolean)
   : null
 
+const CLAMAV_ENABLED = process.env.CLAMAV_ENABLED === 'true'
+const CLAMSCAN_PATH = process.env.CLAMSCAN_PATH || 'clamscan'
+
 module.exports = {
   PORT,
   UPLOAD_DIR,
@@ -17,5 +20,7 @@ module.exports = {
   BASE_URL,
   CLIENT_URL,
   NODE_ENV,
-  ALLOWED_MIME_TYPES
+  ALLOWED_MIME_TYPES,
+  CLAMAV_ENABLED,
+  CLAMSCAN_PATH
 }

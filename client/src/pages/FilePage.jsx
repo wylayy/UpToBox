@@ -175,6 +175,14 @@ function FilePage() {
             >
               Copy Link
             </button>
+            {fileData.shortUrl && (
+              <button
+                onClick={() => copyToClipboard(fileData.shortUrl)}
+                className="btn-secondary flex-1"
+              >
+                Copy Short Link
+              </button>
+            )}
           </div>
         </div>
 

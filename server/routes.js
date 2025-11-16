@@ -185,6 +185,18 @@ function registerRoutes(app) {
     const { fileId } = req.params
     res.redirect(`${CLIENT_URL}/file/${fileId}`)
   })
+
+  // Short link redirect (e.g. https://uplinkr.example.com/s/abc123)
+  app.get('/s/:shortId', (req, res) => {
+    const { shortId } = req.params
+    const file = db.getFileByShortId(shortId)
+
+    if (!file) {
+      return res.status(404).json({ error: 'File not found' })
+    }
+
+    res.redirect(`${CLIENT_URL}/file/${file.id}`)
+  })
 }
 
 module.exports = { registerRoutes }

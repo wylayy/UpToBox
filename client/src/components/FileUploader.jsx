@@ -267,6 +267,14 @@ function FileUploader() {
                     >
                       Copy Link
                     </button>
+                    {file.shortUrl && (
+                      <button
+                        onClick={() => copyToClipboard(file.shortUrl)}
+                        className="btn-secondary text-xs sm:text-sm py-1 px-3"
+                      >
+                        Copy Short
+                      </button>
+                    )}
                     <button
                       onClick={() => window.open(file.url, '_blank')}
                       className="btn-primary text-xs sm:text-sm py-1 px-3"
