@@ -63,20 +63,6 @@ function SystemStats() {
               <p className="text-slate-300 text-sm mb-1">Total Files</p>
               <p className="text-3xl font-bold">{stats?.totalFiles || 0}</p>
             </div>
-
-            {stats.system.storage && (
-              <div className="bg-slate-800/50 rounded-lg p-4 lg:col-span-3">
-                <div className="flex items-center mb-2">
-                  <HardDrive className="w-4 h-4 text-cyan-400 mr-2" />
-                  <p className="text-slate-400 text-sm">Storage Usage</p>
-                </div>
-                <div className="space-y-1 text-sm text-slate-300">
-                  <p>Uploads directory: <span className="font-mono break-all">{stats.system.storage.uploadsDir}</span></p>
-                  <p>Files size: {formatBytes(stats.system.storage.uploadsSize || 0)}</p>
-                  <p>Metadata (DB) size: {formatBytes(stats.system.storage.dbFileSize || 0)}</p>
-                </div>
-              </div>
-            )}
             <div className="bg-blue-600/30 p-3 rounded-lg">
               <Files className="w-8 h-8 text-blue-400" />
             </div>
@@ -86,7 +72,7 @@ function SystemStats() {
         <div className="card bg-gradient-to-br from-purple-600/20 to-purple-800/20 border-purple-500/30">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-300 text-sm mb-1">Total Storage</p>
+              <p className="text-slate-300 text-sm mb-1">Disk Usage</p>
               <p className="text-3xl font-bold">{formatBytes(stats?.totalSize || 0)}</p>
             </div>
             <div className="bg-purple-600/30 p-3 rounded-lg">
@@ -161,7 +147,7 @@ function SystemStats() {
               <p className="text-sm text-slate-400">{stats.system.cpus} cores</p>
             </div>
 
-            <div className="bg-slate-800/50 rounded-lg p-4 md:col-span-3">
+            <div className="bg-slate-800/50 rounded-lg p-4 lg:col-span-3">
               <div className="flex items-center mb-2">
                 <HardDrive className="w-4 h-4 text-yellow-400 mr-2" />
                 <p className="text-slate-400 text-sm">Memory Usage</p>
@@ -179,6 +165,23 @@ function SystemStats() {
                 </div>
               </div>
             </div>
+
+            {stats.system.storage && (
+              <div className="bg-slate-800/50 rounded-lg p-4 lg:col-span-3">
+                <div className="flex items-center mb-2">
+                  <HardDrive className="w-4 h-4 text-cyan-400 mr-2" />
+                  <p className="text-slate-400 text-sm">Disk Usage</p>
+                </div>
+                <div className="space-y-1 text-sm text-slate-300">
+                  <p>
+                    Uploads directory:{' '}
+                    <span className="font-mono break-all">{stats.system.storage.uploadsDir}</span>
+                  </p>
+                  <p>Files size: {formatBytes(stats.system.storage.uploadsSize || 0)}</p>
+                  <p>Metadata (DB) size: {formatBytes(stats.system.storage.dbFileSize || 0)}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
