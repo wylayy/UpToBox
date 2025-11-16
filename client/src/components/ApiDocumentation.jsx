@@ -4,7 +4,7 @@ import { Code, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
 function ApiDocumentation() {
   const [copiedCode, setCopiedCode] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
-  const exampleBaseUrl = 'https://uplinkr.example.com'
+  const exampleBaseUrl = import.meta.env.VITE_PUBLIC_BASE_URL
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text)
@@ -20,7 +20,7 @@ function ApiDocumentation() {
     {
       id: 'curl',
       language: 'cURL (Bash)',
-      code: `# Set your public base URL (same as BASE_URL / CLIENT_URL in .env)
+      code: `# Set to public base URL
 BASE_URL="${exampleBaseUrl}"
 
 # Upload file
@@ -43,7 +43,7 @@ curl -X POST "$BASE_URL/api/upload" \\
       id: 'javascript',
       language: 'JavaScript (Fetch API)',
       code: `// Upload file using Fetch API
-const BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+const BASE_URL = '${exampleBaseUrl}'; // Set to public base URL
 
 const fileInput = document.querySelector('input[type="file"]');
 const file = fileInput.files[0];
@@ -70,7 +70,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 
-const BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+const BASE_URL = '${exampleBaseUrl}'; // Set to public base URL
 
 const form = new FormData();
 form.append('file', fs.createReadStream('/path/to/file.pdf'));
@@ -90,7 +90,7 @@ axios.post(BASE_URL + '/api/upload', form, {
       code: `# Upload file using Python requests
 import requests
 
-BASE_URL = '${exampleBaseUrl}'  # same as BASE_URL / CLIENT_URL in .env
+BASE_URL = '${exampleBaseUrl}'  # Set to public base URL
 
 url = BASE_URL + '/api/upload'
 files = {'file': open('/path/to/file.pdf', 'rb')}
@@ -107,7 +107,7 @@ print('File URL:', data['file']['url'])`
       code: `<?php
 // Upload file using PHP cURL
 $file_path = '/path/to/file.pdf';
-$BASE_URL = '${exampleBaseUrl}'; // same as BASE_URL / CLIENT_URL in .env
+$BASE_URL = '${exampleBaseUrl}'; // Set to public base URL
 $url = $BASE_URL . '/api/upload';
 
 $curl = curl_init();
@@ -143,7 +143,7 @@ import (
     "os"
 )
 
-const baseURL = "${exampleBaseUrl}" // same as BASE_URL / CLIENT_URL in .env
+const baseURL = "${exampleBaseUrl}" // Set to public base URL
 
 func uploadFile(filepath string) {
     file, _ := os.Open(filepath)
@@ -186,7 +186,7 @@ class Program
         
         form.Add(streamContent, "file", Path.GetFileName(filePath));
         
-        const string BASE_URL = "${exampleBaseUrl}"; // same as BASE_URL / CLIENT_URL in .env
+        const string BASE_URL = "${exampleBaseUrl}"; // Set to public base URL
         var response = await client.PostAsync(
             BASE_URL + "/api/upload", form);
         var result = await response.Content.ReadAsStringAsync();
@@ -202,7 +202,7 @@ class Program
 require 'net/http'
 require 'uri'
 
-BASE_URL = '${exampleBaseUrl}' # same as BASE_URL / CLIENT_URL in .env
+BASE_URL = '${exampleBaseUrl}' # Set to public base URL
 
 uri = URI(BASE_URL + '/api/upload')
 request = Net::HTTP::Post.new(uri)
@@ -222,7 +222,7 @@ puts response.body`
       id: 'powershell',
       language: 'PowerShell',
       code: `# Upload file using PowerShell
-$BASE_URL = "${exampleBaseUrl}" # same as BASE_URL / CLIENT_URL in .env
+$BASE_URL = "${exampleBaseUrl}" # Set to public base URL
 $uri = "$BASE_URL/api/upload"
 $filePath = "C:\\path\\to\\file.pdf"
 
