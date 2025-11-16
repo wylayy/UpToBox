@@ -64,6 +64,8 @@ const dbOps = {
         size: fileData.size,
         upload_date: fileData.uploadDate,
         expiry_date: fileData.expiryDate || null,
+        password_hash: fileData.password_hash || null,
+        password_salt: fileData.password_salt || null,
         downloads: 0,
         created_at: new Date().toISOString()
       };

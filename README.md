@@ -21,8 +21,8 @@
 - ⏰ **Auto Expiry** - Files expire automatically (1 day, 7 days, 1 month, or never)
 - 👁️ **File Preview** - View images, videos, audio, PDFs in browser
 - 📱 **QR Code** - Share files via QR code
-- 📊 **Analytics** - Download tracking, geolocation, charts
-- 🔒 **Secure** - Rate limiting, helmet security, auto cleanup
+- 📊 **Analytics** - Download tracking with geolocation (no raw IP stored)
+- 🔒 **Secure** - Rate limiting, helmet security, auto cleanup, optional password-protected files
 - 🐳 **Docker Ready** - Full containerization support
 
 ---
@@ -95,6 +95,18 @@ curl -X POST http://localhost:3001/api/upload \
 **Backend:** Node.js, Express, Multer, node-cron, express-rate-limit, geoip-lite
 
 **Frontend:** React 18, TailwindCSS, React Router, Axios, Lucide Icons, react-hot-toast, qrcode.react, canvas-confetti, recharts
+
+---
+
+## 🔐 Privacy & Security
+
+- Files can be configured to **auto-expire** (1 day, 7 days, 1 month, or never).
+- Optional **password protection** per file: downloads require the correct password.
+- Download analytics store **country/city, referrer, and user agent**, but **not raw IP addresses**.
+- Download responses are sent with **no-store cache headers** to reduce unintended caching.
+- Designed to run behind **HTTPS** (e.g. via Nginx + Cloudflare Tunnel) for encrypted transport.
+
+For deployment and TLS/Cloudflare details, see **[DEPLOYMENT.md](./DEPLOYMENT.md)**.
 
 ---
 

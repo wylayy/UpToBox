@@ -1,16 +1,16 @@
 const geoip = require('geoip-lite');
 
-// Track download analytics
+// Track download analytics (without storing raw IP)
 function trackDownload(fileId, req) {
-  const ip = req.ip || req.connection.remoteAddress;
-  const geo = geoip.lookup(ip);
+  const rawIp = req.ip || req.connection.remoteAddress || '';
+  const clientIp = rawIp.replace(/^::ffff:/, '');
+  const geo = geoip.lookup(clientIp);
   const referrer = req.get('Referrer') || req.get('Referer') || 'direct';
   const userAgent = req.get('User-Agent') || 'unknown';
 
   return {
     fileId: fileId,
     timestamp: new Date().toISOString(),
-    ip: ip,
     country: geo ? geo.country : 'Unknown',
     city: geo ? geo.city : 'Unknown',
     referrer: referrer,

@@ -1,9 +1,14 @@
+import { useEffect, Suspense, lazy } from 'react'
 import FileUploader from '../components/FileUploader'
-import SystemStats from '../components/SystemStats'
-import ApiDocumentation from '../components/ApiDocumentation'
+const SystemStats = lazy(() => import('../components/SystemStats'))
+const ApiDocumentation = lazy(() => import('../components/ApiDocumentation'))
 import { Zap, Shield, Cloud } from 'lucide-react'
 
 function HomePage() {
+  useEffect(() => {
+    document.title = 'Uplinkr - Fast & Secure File Sharing'
+  }, [])
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
@@ -55,12 +60,16 @@ function HomePage() {
 
       {/* System Stats Section */}
       <div className="max-w-6xl mx-auto mb-16">
-        <SystemStats />
+        <Suspense fallback={<div className="card text-center text-slate-400">Loading system stats...</div>}>
+          <SystemStats />
+        </Suspense>
       </div>
 
       {/* API Documentation Section */}
       <div className="max-w-6xl mx-auto mb-16">
-        <ApiDocumentation />
+        <Suspense fallback={<div className="card text-center text-slate-400">Loading API examples...</div>}>
+          <ApiDocumentation />
+        </Suspense>
       </div>
 
       {/* Footer */}

@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const crypto = require('crypto')
 const db = require('../database')
 const { trackDownload } = require('../middleware/analytics')
 const { UPLOAD_DIR, BASE_URL, ALLOWED_MIME_TYPES } = require('../config')
@@ -46,7 +47,7 @@ function isMimeTypeAllowed(file) {
   return ALLOWED_MIME_TYPES.includes(file.mimetype)
 }
 
-function createFileRecord({ file, expiryOption, customFilename }) {
+function createFileRecord({ file, expiryOption, customFilename, password }) {
   if (!file) {
     return {
       ok: false,
@@ -75,6 +76,17 @@ function createFileRecord({ file, expiryOption, customFilename }) {
     }
   }
 
+  let passwordHash = null
+  let passwordSalt = null
+
+  if (password && password.trim()) {
+    passwordSalt = crypto.randomBytes(16).toString('hex')
+    passwordHash = crypto
+      .createHash('sha256')
+      .update(passwordSalt + password)
+      .digest('hex')
+  }
+
   const fileId = path.parse(file.filename).name
   const expiryDate = calculateExpiryDate(normalizedExpiry)
   const originalName = customFilename || file.originalname
@@ -86,7 +98,9 @@ function createFileRecord({ file, expiryOption, customFilename }) {
     mimetype: file.mimetype,
     size: file.size,
     uploadDate: new Date().toISOString(),
-    expiryDate
+    expiryDate,
+    password_hash: passwordHash,
+    password_salt: passwordSalt
   }
 
   const saved = db.addFile(fileData)
@@ -113,7 +127,8 @@ function createFileRecord({ file, expiryOption, customFilename }) {
       type: file.mimetype,
       url: fileUrl,
       downloadUrl,
-      expiryDate
+      expiryDate,
+      hasPassword: !!passwordHash
     }
   }
 }
@@ -157,6 +172,34 @@ function getFileForDownload(fileId, req) {
 
   const { fileData, filePath } = baseResult
 
+  const hasPassword = !!fileData.password_hash
+
+  if (hasPassword) {
+    const providedPassword =
+      (req.query && req.query.password) || req.headers['x-download-password']
+
+    if (!providedPassword || !providedPassword.trim()) {
+      return {
+        ok: false,
+        status: 401,
+        message: 'Password required for this file'
+      }
+    }
+
+    const computedHash = crypto
+      .createHash('sha256')
+      .update((fileData.password_salt || '') + providedPassword)
+      .digest('hex')
+
+    if (computedHash !== fileData.password_hash) {
+      return {
+        ok: false,
+        status: 403,
+        message: 'Invalid password'
+      }
+    }
+  }
+
   try {
     const analyticsData = trackDownload(fileId, req)
     db.addAnalytics(analyticsData)
@@ -193,6 +236,7 @@ function getFileInfo(fileId) {
       uploadDate: fileData.upload_date,
       expiryDate: fileData.expiry_date,
       downloads: fileData.downloads,
+      hasPassword: !!fileData.password_hash,
       url: `${BASE_URL}/f/${fileId}`,
       downloadUrl: `${BASE_URL}/api/download/${fileId}`
     }

@@ -13,6 +13,7 @@ function FileUploader() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [expiry, setExpiry] = useState('never')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [qrCodeUrl, setQrCodeUrl] = useState(null)
   const [previewFile, setPreviewFile] = useState(null)
@@ -43,6 +44,10 @@ function FileUploader() {
         const formData = new FormData()
         formData.append('file', fileToUpload)
         formData.append('expiry', expiry)
+
+        if (password) {
+          formData.append('password', password)
+        }
         
         // Send custom filename if we renamed it
         if (customFileName) {
@@ -154,6 +159,14 @@ function FileUploader() {
         <p className="text-xs text-slate-400 mt-2">
           Files will be automatically deleted after the expiry period
         </p>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="input w-full mt-3"
+          placeholder="Optional password to protect downloads"
+          disabled={uploading}
+        />
       </div>
 
       {/* Upload Area */}
@@ -255,7 +268,7 @@ function FileUploader() {
                       Copy Link
                     </button>
                     <button
-                      onClick={() => window.open(file.downloadUrl, '_blank')}
+                      onClick={() => window.open(file.url, '_blank')}
                       className="btn-primary text-sm py-1 px-3"
                     >
                       Download

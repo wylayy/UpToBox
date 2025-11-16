@@ -9,6 +9,7 @@ function FilePage() {
   const [fileData, setFileData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [downloadPassword, setDownloadPassword] = useState('')
 
   useEffect(() => {
     const fetchFileData = async () => {
@@ -25,6 +26,14 @@ function FilePage() {
     fetchFileData()
   }, [fileId])
 
+  useEffect(() => {
+    if (fileData?.name) {
+      document.title = `${fileData.name} - Download File - Uplinkr`
+    } else {
+      document.title = 'Uplinkr - File'
+    }
+  }, [fileData])
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -40,6 +49,34 @@ function FilePage() {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
     toast.success('Link copied to clipboard!')
+  }
+
+  const handleDownload = async () => {
+    try {
+      const config = {
+        responseType: 'blob',
+      }
+
+      if (fileData.hasPassword && downloadPassword) {
+        config.headers = {
+          'X-Download-Password': downloadPassword,
+        }
+      }
+
+      const response = await apiClient.get(`/download/${fileId}`, config)
+      const blob = new Blob([response.data])
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileData.name
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Download failed'
+      toast.error(msg)
+    }
   }
 
   if (loading) {
@@ -110,16 +147,28 @@ function FilePage() {
               <p className="text-slate-400 text-sm mb-1">Downloads</p>
               <p className="text-xl font-semibold">{fileData.downloads}</p>
             </div>
+            {fileData.hasPassword && (
+              <div className="bg-slate-800/50 rounded-lg p-4">
+                <p className="text-slate-400 text-sm mb-1">Password</p>
+                <input
+                  type="password"
+                  value={downloadPassword}
+                  onChange={(e) => setDownloadPassword(e.target.value)}
+                  className="input w-full"
+                  placeholder="Enter password to download this file"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <a
-              href={fileData.downloadUrl}
+            <button
+              onClick={handleDownload}
               className="btn-primary flex-1 text-center inline-flex items-center justify-center"
             >
               <Download className="w-5 h-5 mr-2" />
               Download File
-            </a>
+            </button>
             <button
               onClick={() => copyToClipboard(fileData.url)}
               className="btn-secondary flex-1"

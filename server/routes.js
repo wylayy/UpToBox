@@ -56,7 +56,8 @@ function registerRoutes(app) {
       const result = createFileRecord({
         file: req.file,
         expiryOption: req.body.expiry,
-        customFilename: req.body.customFilename
+        customFilename: req.body.customFilename,
+        password: req.body.password
       })
 
       if (!result.ok) {
@@ -86,6 +87,12 @@ function registerRoutes(app) {
         return res.status(result.status).json({ error: result.message })
       }
 
+      res.set({
+        'Cache-Control': 'private, no-store, no-cache, must-revalidate, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0'
+      })
+
       res.download(result.filePath, result.downloadName)
     } catch (error) {
       console.error('Download error:', error)
@@ -103,6 +110,7 @@ function registerRoutes(app) {
         return res.status(result.status).json({ error: result.message })
       }
 
+      res.set('Cache-Control', 'no-store')
       res.json(result.data)
     } catch (error) {
       console.error('File info error:', error)
@@ -159,6 +167,7 @@ function registerRoutes(app) {
         cpuModel: os.cpus()[0]?.model || 'Unknown'
       }
 
+      res.set('Cache-Control', 'no-store')
       res.json(stats)
     } catch (error) {
       console.error('Stats error:', error)
